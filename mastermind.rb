@@ -23,24 +23,16 @@ def valid_guess?(guess)
 	end
 end
 
-def correct_guess?(guess, code)
-	return true if guess == code
-end
-
-def check_guess_black(guess, code)
-	black_count = 0
+def check_guess(guess, code)
+	response = []
 	(0..3).each do |number|
-		black_count += 1 if guess[number] == code[number]
+		if guess[number].upcase == code[number]
+			response << "b"
+		elsif code.include?(guess[number].upcase)
+			response << "w"
+		end
 	end
-	black_count
-end
-
-def check_guess_white(guess, code)
-	white_count = 0
-	(0..3).each do |number|
-		white_count += 1 if code.include?(guess[number])
-	end
-	white_count
+	response.join
 end
 
 puts "The code has been generated. Begin guessing..."
@@ -51,32 +43,31 @@ turns_remaining = 12
 game_loop = true
 
 while game_loop
-	puts "Colors are: (R)ed, (O)range, (Y)ellow, (G)reen, (B)lue, (P)urple"
-	puts "What is your guess?"
+	puts "Colored pegs are: (R)ed, (O)range, (Y)ellow, (G)reen, (B)lue, (P)urple.\n" + 
+	      "Response pegs are colored (b)lack for a successful guess and (w)hite.\n" +
+	      "when the color is somewhere in the code but in the wrong place.\n\n" +
+	      "What is your guess?"
 	guess = gets.chomp
 
- 	if valid_guess?(guess) == false
- 		puts "Guess must be four letters from the color list."
-    else
-    	guessed_colors = guess.split(//)
-    	if correct_guess?(guessed_colors, secret_code)
-    		puts "Good job! You've cracked the secret code!"
-    		break
-    	end
-    	turns_remaining -= 1
-    	
-    	black = check_guess_black(guessed_colors, secret_code)
-    	white = check_guess_white(guessed_colors, secret_code) - black
+	if valid_guess?(guess) == false
+		puts "Guess must be four letters from the color list."
+	else
+		guessed_colors = guess.split(//)
+		turns_remaining -= 1
 
-    	print guessed_colors
-    	print secret_code
-    	puts	
-    	puts "black pegs: #{black}"
-    	puts "white pegs: #{white}"
+		if check_guess(guessed_colors, secret_code) == "bbbb"
+			puts "Good job! You've cracked the secret code!"
+			break
+		end
 
-    	if turns_remaining == 0
-    		puts "You ran out of turns and couldn't figure it out! Better luck next time!"
-    		break
-    	end 
-    end
+		print guessed_colors #debug: shows guess and code
+		print secret_code #debug
+		puts
+		puts "Results: " + check_guess(guessed_colors, secret_code)
+
+		if turns_remaining == 0
+			puts "You ran out of turns and couldn't figure it out! Better luck next time!"
+			break
+		end 
+	end
 end
